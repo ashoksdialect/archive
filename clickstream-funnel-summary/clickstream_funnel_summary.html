@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>System Design Carousel - Clickstream Funnel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0f172a;
+            --accent-gold: #f6ad55;
+            --accent-blue: #63b3ed;
+            --accent-mint: #4fd1c5;
+            --accent-purple: #b794f4;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --safe-margin: 80px;
+            --footer-margin-bottom: 40px; 
+            --footer-height: 100px;
+        }
+
+        @media print {
+            @page { size: 1080px 1350px; margin: 0; }
+            body { -webkit-print-color-adjust: exact; margin: 0; padding: 0; }
+            .slide { margin: 0 !important; box-shadow: none !important; page-break-after: always; }
+        }
+
+        body { 
+            margin: 0; padding: 0; background-color: #333; 
+            font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center;
+        }
+
+        .slide {
+            width: 1080px; height: 1350px;
+            background: var(--bg-deep); color: var(--text-main);
+            position: relative; box-sizing: border-box; overflow: hidden;
+            margin: 40px 0; padding: var(--safe-margin);
+            display: flex; flex-direction: column;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+
+        .save-bookmark {
+            position: absolute; top: 0; right: var(--safe-margin); 
+            width: 80px; height: 120px;
+            fill: var(--accent-gold); z-index: 30;
+        }
+
+        .header-area {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .top-bar { display: flex; align-items: center; gap: 25px; width: 750px; margin-bottom: 20px; }
+        .top-label { color: var(--accent-blue); font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 6px; }
+        .top-line { flex-grow: 1; height: 2px; background: linear-gradient(to right, var(--accent-blue), transparent); }
+
+        h1 { font-weight: 900; letter-spacing: -2px; line-height: 1.1; color: #fff; margin: 0 0 15px 0; }
+        .body-text { line-height: 1.5; color: var(--text-dim); margin: 0; }
+        .highlight { color: var(--accent-gold); font-weight: 700; }
+
+        .middle-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-bottom: 110px; 
+            overflow: hidden;
+        }
+
+        .image-area {
+            width: 100%;
+            height: 640px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(99, 179, 237, 0.2);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .image-area img { max-width: 95%; max-height: 95%; object-fit: contain; }
+
+        .footer { 
+            position: absolute; bottom: var(--footer-margin-bottom); left: var(--safe-margin); right: var(--safe-margin);
+            height: var(--footer-height); display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; z-index: 40;
+            background: var(--bg-deep);
+        }
+        
+        .action-btn { 
+            background: var(--accent-gold); color: var(--bg-deep); padding: 18px 40px; border-radius: 50px; 
+            font-weight: 900; font-size: 26px; display: flex; align-items: center; gap: 15px; text-transform: uppercase; 
+        }
+        .page-indicator { font-size: 36px; font-weight: 900; color: var(--text-dim); }
+
+        .feature-list { list-style: none; padding: 0; margin: 0; }
+        .feature-item { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 22px; font-size: 30px; line-height: 1.4; color: var(--text-dim); }
+        .feature-item div { color: var(--text-main); }
+        .bullet { color: var(--accent-gold); font-weight: 900; font-size: 40px; line-height: 1; }
+        
+        .engineer-note { 
+            margin-top: 25px; 
+            background: rgba(79, 209, 197, 0.08); 
+            border-left: 10px solid var(--accent-mint); 
+            padding: 20px; 
+            border-radius: 0 20px 20px 0;
+            flex-shrink: 0;
+        }
+        .note-title { color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; }
+        .note-body { font-size: 24px; line-height: 1.4; color: var(--text-main); }
+        
+        /* ADJUST SIZES AND PADDINGS SEPARATELY TO STOP TEXT OVERFLOW */
+        .slide:nth-child(5) .engineer-note { margin-top: 10px; }
+        .slide:nth-child(7) .engineer-note { margin-top: 15px; }
+        .slide:nth-child(8) pre { font-size: 13.5px; padding: 14px; margin: 4px 0; }
+        .slide:nth-child(8) .engineer-note { margin-top: 10px; padding: 14px; }
+        .slide:nth-child(10) .engineer-note { margin-top: 10px; }
+        .slide:nth-child(11) .engineer-note { margin-top: 15px; }
+        .slide:nth-child(12) .engineer-note { margin-top: 12px; }
+        .slide:nth-child(7) .engineer-note { border-left-color: var(--accent-purple); }
+        
+        /* LAYOUT STYLING & COMPACT VISIBILITY GUARDS */
+        .table-wrapper {
+            width: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 8px;
+            background: rgba(30, 41, 59, 0.3);
+            box-sizing: border-box;
+        }
+
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        
+        th { 
+            background-color: rgba(246, 173, 85, 0.05); 
+            color: var(--accent-gold); 
+            padding: 8px 10px; 
+            text-align: left; 
+            border-bottom: 3px solid var(--accent-gold); 
+            font-size: 14px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+        td { 
+            padding: 8px 10px; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06); 
+            color: var(--text-main); 
+            font-size: 12.5px; 
+            line-height: 1.35; 
+            white-space: normal;
+            word-break: break-all; 
+        }
+        
+        .table-split-container { display: flex; flex-direction: column; gap: 10px; width: 100%; overflow: hidden; }
+        .table-title { font-size: 16px; font-weight: 800; color: var(--accent-blue); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 1px; }
+
+        pre {
+            background: rgba(15, 23, 42, 0.7); 
+            border: 1px solid rgba(99, 179, 237, 0.25);
+            border-radius: 14px;
+            padding: 14px 20px;
+            margin: 4px 0;
+            overflow: hidden;
+            font-family: monospace;
+            font-size: 15px;
+            line-height: 1.35;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.15);
+        }
+        .json-key { color: var(--accent-blue); font-weight: 700; }
+        .json-str { color: var(--accent-mint); }
+        .json-num { color: var(--accent-gold); }
+        .json-null { color: #f87171; font-weight: 700; }
+        .sql-keyword { color: var(--accent-gold); font-weight: 700; }
+        .sql-comment { color: var(--text-dim); font-style: italic; }
+
+        .branding-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .lab-brand { font-size: 32px; font-weight: 900; letter-spacing: -1px; color: #fff; text-transform: uppercase; }
+        .lab-brand span { color: var(--accent-gold); }
+        .save-ref { color: var(--accent-blue); font-weight: 800; font-size: 20px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">System Design</span><div class="top-line"></div></div>
+            <h1 style="font-size: 84px; line-height: 1.1;">Clickstream Funnel<br><span style="font-size: 72px; color: var(--accent-blue);">System Design</span></h1>
+        </div>
+        <div class="middle-content">
+            <p class="body-text" style="font-size: 34px; max-width: 940px; margin-bottom: 35px; color: var(--text-main); font-weight: 600;">
+                Our goal is to identify user clicks that successfully convert into actual sales, and map the exact engineering steps required to do it.
+            </p>
+            <p class="body-text" style="font-size: 28px; max-width: 940px; margin-bottom: 35px;">
+                At a scale of <span class="highlight">100M+ daily events</span>, stateless, high-volume click tracking cannot simply be continuously updated against stateful, low-volume purchase ledgers without triggering massive write congestion and data warehouse performance degradation.
+            </p>
+            <div style="background: linear-gradient(135deg, rgba(99, 179, 237, 0.1) 0%, rgba(15, 23, 42, 0) 100%); border-left: 10px solid var(--accent-mint); padding: 35px; border-radius: 0 20px 20px 0;">
+                <span style="color: var(--accent-mint); font-size: 22px; font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 8px;">The Blueprint</span>
+                <div style="font-size: 26px; font-weight: 500; line-height: 1.45; color: var(--text-main);">This design details a decoupled, <strong>Medallion Lakehouse Architecture</strong> on GCP engineered to isolate streaming ingress, resolve cross-device identities, and materialize end-to-end conversion paths cleanly and cost-effectively.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Swipe <span>&rarr;</span></div><div class="page-indicator">01 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">The Blueprint</span><div class="top-line"></div></div>
+            <h1 style="font-size: 52px;">The Complete Component Map</h1>
+            <p class="body-text" style="font-size: 28px;">A horizontal perspective of data processing. Offloading streaming loads to a decoupled <span class="highlight">Three Layer Pattern</span> to secure analytical operations.</p>
+        </div>
+        <div class="image-area"><img src="ClickStreamDataModel.png" alt="Architecture Diagram"></div>
+        <div class="footer"><div class="action-btn">Explore Stack <span>&rarr;</span></div><div class="page-indicator">02 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Layer One</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Data Inbound - Cloud Pub/Sub</h1>
+            <p class="body-text" style="font-size: 30px;">The serverless ingestion spine designed to act as an elastic <span class="highlight">shock absorber</span> for all streaming behavioral packets.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Parallel Ingress:</span> Disabling ordering keys allows maximum parallel load balancing across data distribution channels.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">High Availability:</span> Serverless cluster management avoids resource limitations during sudden traffic bursts.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Message Retention:</span> Retains streaming items securely for seven days to protect downstream consumer modifications.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <div class="note-title">Architect's Note</div>
+                <div class="note-body">Our architectural scope begins directly at this reception boundary, isolating our system availability from external proxy variations.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">03 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Storage Strategy</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Bifurcated Storage - Cold & Hot Paths</h1>
+            <p class="body-text" style="font-size: 30px;">Splitting arriving tracking items to balance <span class="highlight">low cost retention</span> with <span class="highlight">immediate query access</span>.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">The Cold Path:</span> Groups telemetry files every five minutes into Cloud Storage blocks using compressed Apache Parquet formats.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">The Hot Path:</span> Directs streaming messages into BigQuery staging environments via the continuous Storage Write API.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Cost Management:</span> Columnar compression on the cold path cuts resource footprints by over eighty percent.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <div class="note-title">Architect's Note</div>
+                <div class="note-body">Cold path parquet objects serve as our immutable ledger, allowing for full state reconstruction if needed.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">04 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Staging Schema</span><div class="top-line"></div></div>
+            <h1 style="font-size: 55px; margin-bottom: 5px;">Data Inbound Structure</h1>
+            <p class="body-text" style="font-size: 26px;">Proxies extract top-level keys via shallow parsing, storing the complete nested payload string directly into a native <span class="highlight">JSON column</span> format.</p>
+        </div>
+        <div class="middle-content" style="justify-content: flex-start;">
+            <div class="table-title">Raw App Ping Stream Payload Example</div>
+            <pre>
+{
+  <span class="json-key">"event_id"</span>: <span class="json-str">"9a2f4b8c-1e7d"</span>,
+  <span class="json-key">"session_id"</span>: <span class="json-str">"sess_99x"</span>,
+  <span class="json-key">"event_type"</span>: <span class="json-str">"product_click"</span>,
+  <span class="json-key">"event_timestamp"</span>: <span class="json-str">"2026-05-18T09:04:15Z"</span>,
+  <span class="json-key">"payload"</span>: {
+    <span class="json-key">"product_id"</span>: <span class="json-str">"prod_77y"</span>,
+    <span class="json-key">"category"</span>: <span class="json-str">"electronics"</span>
+  }
+}</pre>
+            
+            <div class="table-title">Database Staging Table View: stg_clickstream_events</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">event_id</th>
+                            <th style="width: 12%;">session_id</th>
+                            <th style="width: 16%;">event_type</th>
+                            <th style="width: 17%;">event_timestamp</th>
+                            <th style="width: 45%;">raw_payload (JSON Data Type / Contents)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1a2b3c4d</td>
+                            <td>sess_99x</td>
+                            <td>home_page_view</td>
+                            <td>2026-05-18 09:00:00</td>
+                            <td><code style="color: var(--accent-mint);">{"user_id": null, "device_context": {"os": "iOS"}}</code></td>
+                        </tr>
+                        <tr>
+                            <td>5e6f7a8b</td>
+                            <td>sess_99x</td>
+                            <td>search_input</td>
+                            <td>2026-05-18 09:02:05</td>
+                            <td><code style="color: var(--accent-mint);">{"user_id": null, "payload": {"query_string": "keyboard"}}</code></td>
+                        </tr>
+                        <tr>
+                            <td>3c4d5e6f</td>
+                            <td>sess_99x</td>
+                            <td>product_click</td>
+                            <td>2026-05-18 09:04:15</td>
+                            <td><code style="color: var(--accent-mint);">{"user_id": null, "payload": {"product_id": "prod_77y"}}</code></td>
+                        </tr>
+                        <tr>
+                            <td>7a8b9c0d</td>
+                            <td>sess_99x</td>
+                            <td>user_auth_login</td>
+                            <td>2026-05-18 09:05:00</td>
+                            <td><code style="color: var(--accent-mint);">{"user_id": "usr_ashok_92", "payload": {"method": "oauth"}}</code></td>
+                        </tr>
+                        <tr>
+                            <td>1e2f3a4b</td>
+                            <td>sess_99x</td>
+                            <td>add_to_cart</td>
+                            <td>2026-05-18 09:06:24</td>
+                            <td><code style="color: var(--accent-mint);">{"user_id": "usr_ashok_92", "payload": {"product_id": "prod_77y"}}</code></td>
+                        </tr>
+                        <tr>
+                            <td>9c0d1e2f</td>
+                            <td>sess_99x</td>
+                            <td>purchase_success</td>
+                            <td>2026-05-18 09:08:30</td>
+                            <td><code style="color: var(--accent-mint);">{"user_id": "usr_ashok_92", "payload": {"order_id": "ord_88124x", "gross_amount": 149.99}}</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="engineer-note">
+                <div class="note-body" style="font-size: 19px; line-height: 1.35;">Shallow Ingestion filters core metrics while storing the raw block text. Downstream transformation pipelines use the <code style="color: var(--accent-gold);">user_auth_login</code> token event to cleanly stitch identities back across the full anonymous window.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">05 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Layer Two</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Identity Stitching Resolution</h1>
+            <p class="body-text" style="font-size: 30px;">Connecting <span class="highlight">anonymous guest sessions</span> to authenticated user profiles through a non destructive relational bridge.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">The Challenge:</span> Users browse anonymously before log in. Early actions contain empty tracking columns.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">The Resolution Map:</span> We isolate the specific event where an active session token ties to a user profile.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Retroactive Alignment:</span> The lookup links the true user index back onto early guest actions during the load.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <div class="note-title">Architect's Note</div>
+                <div class="note-body">We completely avoid slow SQL update commands, using high speed relational joins to maximize processing throughput.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">06 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Funnel Logic</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Chronological Funnel Sequencing</h1>
+            <p class="body-text" style="font-size: 30px;">Stitching isolated event items into an ordered timeline using window functions to trace clear user movements.</p>
+        </div>
+        <div class="middle-content">
+            <div class="table-title">Pipeline Execution Example Trace</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 8%;">Idx</th>
+                            <th style="width: 16%;">Session ID</th>
+                            <th style="width: 28%;">Event Type</th>
+                            <th style="width: 18%;">Prev Action</th>
+                            <th style="width: 18%;">Next Action</th>
+                            <th style="width: 12%;">Delta Secs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>1</strong></td><td>sess_99x</td><td><span class="highlight">home_page_view</span></td><td style="color: var(--text-dim);">NULL</td><td>search_input</td><td>0</td></tr>
+                        <tr><td><strong>2</strong></td><td>sess_99x</td><td><span class="highlight">search_input</span></td><td>home_page_view</td><td>product_click</td><td>125</td></tr>
+                        <tr><td><strong>3</strong></td><td>sess_99x</td><td><span class="highlight">product_click</span></td><td>search_input</td><td>add_to_cart</td><td>130</td></tr>
+                        <tr><td><strong>4</strong></td><td>sess_99x</td><td><span class="highlight">add_to_cart</span></td><td>product_click</td><td>purchase_success</td><td>129</td></tr>
+                        <tr><td><strong>5</strong></td><td>sess_99x</td><td><span class="highlight">purchase_success</span></td><td>add_to_cart</td><td style="color: var(--text-dim);">NULL</td><td>126</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="engineer-note" style="border-left-color: var(--accent-purple);">
+                <div class="note-body" style="font-size: 24px; line-height: 1.4;">SQL Lead and Lag analytical window functions calculate journey latency markers across matching arrays without triggering heavy cross-table scanning loops during processing.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">07 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Pipeline Logic</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">The Transformation Split Logic</h1>
+            <p class="body-text" style="font-size: 28px;">How our hourly scheduled SQL pipeline parses the raw staging JSON and routes data into decoupled warehouse entities.</p>
+        </div>
+        <div class="middle-content" style="justify-content: flex-start;">
+            <div class="table-title">1. Loading fact_clickstream (Processes All Rows)</div>
+            <pre><span class="sql-keyword">SELECT</span> session_id, event_type, 
+       <span class="sql-comment">-- Downstream JSON path extraction expressions</span>
+       LAX_STRING(raw_payload.payload.product_id) <span class="sql-keyword">AS</span> product_id
+<span class="sql-keyword">FROM</span> stg_clickstream_events;</pre>
+
+            <div class="table-title">2. Loading fact_orders (Isolates Success Ledger Rows Alone)</div>
+            <pre><span class="sql-keyword">SELECT</span> LAX_STRING(raw_payload.payload.order_id) <span class="sql-keyword">AS</span> order_id,
+       session_id, 
+       LAX_NUMERIC(raw_payload.payload.gross_amount) <span class="sql-keyword">AS</span> gross_amount
+<span class="sql-keyword">FROM</span> stg_clickstream_events
+<span class="sql-keyword">WHERE</span> event_type = <span class="json-str">'purchase_success'</span>;</pre>
+
+            <div class="engineer-note">
+                <div class="note-body">Filtering specifically for purchase parameters safeguards transaction tables from web traffic noise, using the session identifier as an immutable star schema link.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">08 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Warehouse Layer</span><div class="top-line"></div></div>
+            <h1 style="font-size: 55px; margin-bottom: 5px;">Warehouse Layer - Relational Split</h1>
+            <p class="body-text" style="font-size: 26px;">We isolate transactional financial realities from raw web activity traffic volumes inside our storage core.</p>
+        </div>
+        <div class="middle-content" style="justify-content: flex-start; gap: 8px;">
+            <div class="table-split-container">
+                <div>
+                    <div class="table-title">Table A: fact_clickstream</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%;">Column Name</th>
+                                    <th style="width: 15%;">Type</th>
+                                    <th style="width: 65%;">Key Architectural Role Context</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>session_id</strong></td><td>STRING</td><td><span class="highlight">Cluster Key:</span> Groups chronological user browser loops.</td></tr>
+                                <tr><td><strong>sequence_num</strong></td><td>INT64</td><td>Sort key mapping step chronology arrays.</td></tr>
+                                <tr><td><strong>user_id</strong></td><td>STRING</td><td>Nullable master customer index; mapped post resolution.</td></tr>
+                                <tr><td><strong>product_id</strong></td><td>STRING</td><td>Foreign lookup dimension index relating to product catalog trees.</td></tr>
+                                <tr><td><strong>device_type</strong></td><td>STRING</td><td>Context tracking dimension used for frontend responsive metrics.</td></tr>
+                                <tr><td><strong>event_timestamp</strong></td><td>TIMESTAMP</td><td>Event timestamp at which the click took place</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <div class="table-title">Table B: fact_orders</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%;">Column Name</th>
+                                    <th style="width: 15%;">Type</th>
+                                    <th style="width: 65%;">Key Architectural Role Context</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>order_id</strong></td><td>STRING</td><td>Primary key mapping absolute transactional truth.</td></tr>
+                                <tr><td><strong>session_id</strong></td><td>STRING</td><td>Anchor binding checkout events straight to the funnel loop window.</td></tr>
+                                <tr><td><strong>gross_amount</strong></td><td>NUMERIC</td><td>Target pre-normalized revenue milestone asset trace values.</td></tr>
+                                <tr><td><strong>created_at</strong></td><td>TIMESTAMP</td><td>Definitive backend database clock synchronization milestone.</td></tr>
+                                <tr><td><strong>payment_type</strong></td><td>STRING</td><td>Payment gateway categorical tracing identifier.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="engineer-note" style="border-left-color: var(--accent-blue); padding: 12px 20px;">
+                <div class="note-body" style="font-size: 20px; line-height: 1.35;">Separation of concerns isolates storage models from mismatch ingestion schedules, allowing independent indexing optimizations. We skip order_id tracking on clickstream logs to keep row blocks lightweight.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">09 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Serving Model</span><div class="top-line"></div></div>
+            <h1 style="font-size: 55px; margin-bottom: 5px;">Unified Analytics - One Big Table</h1>
+            <p class="body-text" style="font-size: 28px;">Compressing structural links into a wide matrix to deliver sub-second dashboard loading performance numbers.</p>
+        </div>
+        <div class="middle-content" style="justify-content: flex-start;">
+            <div class="table-title" style="color: var(--text-main);">Production Mart Schema: conversion_funnel_summary</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Column Name</th>
+                            <th style="width: 15%;">Data Type</th>
+                            <th style="width: 60%;">Optimization & Serving Function Context</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>session_date</strong></td><td>DATE</td><td><span class="highlight">Partition Key:</span> Avoids multi-year table scans.</td></tr>
+                        <tr><td><strong>product_category</strong></td><td>STRING</td><td><span class="highlight">Cluster Key:</span> Primary landing category per session; optimizes data filtering speeds.</td></tr>
+                        <tr><td><strong>session_id</strong></td><td>STRING</td><td>Unique path sequence key isolating user interaction sets.</td></tr>
+                        <tr><td><strong>user_id</strong></td><td>STRING</td><td>Stitched identity mapping early actions directly to user rows.</td></tr>
+                        <tr><td><strong>traffic_source</strong></td><td>STRING</td><td>Marketing acquisition channel used for direct attribution analysis.</td></tr>
+                        <tr><td><strong>session_start_time</strong></td><td>TIMESTAMP</td><td>Calculated MIN(event_timestamp) marking absolute session ingress start.</td></tr>
+                        <tr><td><strong>session_end_time</strong></td><td>TIMESTAMP</td><td>Calculated MAX(event_timestamp) mapping session boundary closure.</td></tr>
+                        <tr><td><strong>has_purchased</strong></td><td>BOOLEAN</td><td>Pre-calculated flag targeting immediate conversion performance scans.</td></tr>
+                        <tr><td><strong>attributed_revenue</strong></td><td>NUMERIC</td><td>Pre-joined financial outcome metric mapped straight from order files.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="engineer-note" style="border-left-color: var(--accent-blue); padding: 12px 20px;">
+                <div class="note-body" style="font-size: 21px; line-height: 1.35;">Deriving session start/end thresholds downstream preserves raw line processing speed while offering business layers instantaneous performance lookups.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">10 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Pipeline Schedule</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Hourly Orchestration Engine</h1>
+            <p class="body-text" style="font-size: 30px;">How our data pipelines execute automated dependencies securely every sixty minutes without data corruption.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Lightweight Conductor:</span> Managed Apache Airflow coordinates dependencies as a DAG, pushing heavy computation parameters to our serverless warehouse data loops.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Sliding Lookback:</span> Processing a strict two-hour sliding window heals late-arriving mobile telemetry files without producing duplicate record blocks.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Parallel Task Routing:</span> Simultaneously kicks off clickstream sequencing calculations and financial order parsing splits to reduce latency overhead.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <div class="note-title">Architect's Note</div>
+                <div class="note-body">Enforcing strict partition sensors guarantees data availability, preventing downstream marts from running over incomplete ingestion slices.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">11 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Data Governance</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Security Abstraction - Virtual Views</h1>
+            <p class="body-text" style="font-size: 30px;">Isolating warehouse storage logs from business users via a centralized <span class="highlight">virtual governance boundary</span>.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Schema Immunity:</span> Allows modifications to underlying partitions without breaking external dashboard endpoints.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Data Masking:</span> Virtual view filters mask PII attributes and restrict internal indexing structures automatically.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Access Scoping:</span> Row-level and column-level security policies restrict analyst access to only the data relevant to their role, without duplicating tables.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <div class="note-title">Architect's Note</div>
+                <div class="note-body">The virtual view layer delivers structural freedom and access control, shielding our production pipeline assets from direct exposure while policy tags handle column-level masking automatically.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Summary <span>&rarr;</span></div><div class="page-indicator">12 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Pipeline Schedule</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Strategy One - Hourly Incremental Merge</h1>
+            <p class="body-text" style="font-size: 30px;">Using a sliding calculation layout to maintain a <span class="highlight">one hour freshness SLA</span> without rising compute fees.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Partition Pruning:</span> Restricting the merge query to current day segments cuts out data warehouse redundancy.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Two Hour Buffer:</span> Opening the last two hours of files heals tracking sessions that cross over the hour mark.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Idempotent Pipeline:</span> Cloud Composer tracks orchestrations safely, supporting simple retries without duplicates.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <div class="note-title">Architect's Note</div>
+                <div class="note-body">Incremental data processing ensures our query operations scale efficiently, ignoring historical archive weights.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Layer <span>&rarr;</span></div><div class="page-indicator">13 / 14</div></div>
+    </div>
+
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Architecture Outcomes</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Scale Without Compromise</h1>
+            <p class="body-text" style="font-size: 30px;">Transforming high velocity streaming data arrays into a <span class="highlight">structured, secure</span> corporate intelligence framework.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Robust Scalability:</span> Serverless building blocks accept one hundred million daily user steps smoothly.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Continuous Freshness:</span> Incremental updates provide stable one hour delivery timelines predictably.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Sub Second Loads:</span> Fully pre joined consumption layers guarantee rapid dashboard response times.</div></li>
+            </ul>
+        </div>
+        <div class="footer"><div class="action-btn">Done <span>&check;</span></div><div class="page-indicator">14 / 14</div></div>
+    </div>
+
+</body>
+</html>
