@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>System Design Carousel - Final 11 Slides</title>
+    <style>
+        :root {
+            --bg-deep: #0f172a;
+            --accent-gold: #f6ad55;
+            --accent-blue: #63b3ed;
+            --accent-mint: #4fd1c5;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --safe-margin: 80px;
+            --footer-margin-bottom: 40px; 
+            --footer-height: 100px;
+        }
+
+        @media print {
+            @page { size: 1080px 1350px; margin: 0; }
+            body { -webkit-print-color-adjust: exact; margin: 0; padding: 0; }
+            .slide { margin: 0 !important; box-shadow: none !important; page-break-after: always; }
+        }
+
+        body { 
+            margin: 0; padding: 0; background-color: #333; 
+            font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center;
+        }
+
+        .slide {
+            width: 1080px; height: 1350px;
+            background: var(--bg-deep); color: var(--text-main);
+            position: relative; box-sizing: border-box; overflow: hidden;
+            margin: 40px 0; padding: var(--safe-margin);
+            display: flex; flex-direction: column;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+
+        .save-bookmark {
+            position: absolute; top: 0; right: var(--safe-margin); 
+            width: 80px; height: 120px;
+            fill: var(--accent-gold); z-index: 30;
+        }
+
+        .header-area {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .top-bar { display: flex; align-items: center; gap: 25px; width: 750px; margin-bottom: 20px; }
+        .top-label { color: var(--accent-blue); font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 6px; }
+        .top-line { flex-grow: 1; height: 2px; background: linear-gradient(to right, var(--accent-blue), transparent); }
+
+        h1 { font-weight: 900; letter-spacing: -2px; line-height: 1.1; color: #fff; margin: 0 0 15px 0; }
+        .body-text { line-height: 1.5; color: var(--text-dim); margin: 0; }
+        .highlight { color: var(--accent-gold); font-weight: 700; }
+
+        .middle-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-bottom: 120px; 
+        }
+
+        .image-area {
+            width: 100%;
+            height: 660px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(99, 179, 237, 0.2);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .image-area img { max-width: 95%; max-height: 95%; object-fit: contain; }
+
+        .footer { 
+            position: absolute; bottom: var(--footer-margin-bottom); left: var(--safe-margin); right: var(--safe-margin);
+            height: var(--footer-height); display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; z-index: 40;
+            background: var(--bg-deep);
+        }
+        
+        .action-btn { 
+            background: var(--accent-gold); color: var(--bg-deep); padding: 18px 40px; border-radius: 50px; 
+            font-weight: 900; font-size: 26px; display: flex; align-items: center; gap: 15px; text-transform: uppercase; 
+        }
+        .page-indicator { font-size: 36px; font-weight: 900; color: var(--text-dim); }
+
+        .feature-list { list-style: none; padding: 0; margin: 0; }
+        .feature-item { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 20px; font-size: 32px; }
+        .bullet { color: var(--accent-gold); font-weight: 900; font-size: 40px; line-height: 1; }
+        .engineer-note { margin-top: 40px; background: rgba(79, 209, 197, 0.08); border-left: 10px solid var(--accent-mint); padding: 30px; border-radius: 0 20px 20px 0; }
+    </style>
+</head>
+<body>
+
+    <!-- SLIDE 01 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Deep Dive</span><div class="top-line"></div></div>
+            <h1 style="font-size: 92px; white-space: nowrap;">Last-Mile Delivery<br><span style="font-size: 80px; color: var(--accent-blue);">System Design</span></h1>
+        </div>
+        <div class="middle-content">
+            <p class="body-text" style="font-size: 36px; max-width: 940px; margin-bottom: 40px;">
+                Last-mile logistics is the most <span class="highlight">volatile</span> and <span class="highlight">cost-intensive</span> phase. Successfully architecting this requires a resilient system capable of managing <span class="highlight">10M+ daily deliveries</span>.
+            </p>
+            <div style="background: linear-gradient(135deg, rgba(99, 179, 237, 0.1) 0%, rgba(15, 23, 42, 0) 100%); border-left: 10px solid var(--accent-gold); padding: 40px; border-radius: 0 20px 20px 0;">
+                <span style="color: var(--accent-gold); font-size: 22px; font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 10px;">Architectural Strategy</span>
+                <div style="font-size: 30px; font-weight: 600; color: var(--accent-mint);">We leverage a managed AWS ecosystem to decouple infrastructure from operations, allowing the system to scale elastically with demand.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Swipe <span>&rarr;</span></div><div class="page-indicator">01 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 02 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Architecture</span><div class="top-line"></div></div>
+            <h1 style="font-size: 52px;">Scaling to 10M+ Daily Deliveries</h1>
+            <p class="body-text" style="font-size: 28px;">A modular ecosystem designed for <span class="highlight">high-throughput ingestion</span> and <span class="highlight">multi-model persistence</span>. Offloading infrastructure to managed services to prioritize orchestration.</p>
+        </div>
+        <div class="image-area"><img src="last_mile_delivery.png" alt="Architecture Diagram"></div>
+        <div class="footer"><div class="action-btn">Explore Stack <span>&rarr;</span></div><div class="page-indicator">02 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 03 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Traffic Management</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Global Routing - Amazon Route 53</h1>
+            <p class="body-text" style="font-size: 30px;">The secure entry point for the delivery fleet, ensuring <span class="highlight">low-latency connectivity</span> across geographic regions.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Latency-Based Routing:</span> Automatically directs mobile app traffic to the nearest healthy regional endpoint.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">High Availability:</span> Health checks reroute traffic instantly if a regional API gateway fails.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">DNS-Level Security:</span> Provides a hardened entry point for HTTPS requests into the private VPC.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <span style="color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase;">Engineer's Note</span>
+                <div style="font-size: 26px; margin-top: 5px;">Route 53 ensures we have zero single points of failure at the DNS level before data even reaches our servers.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Service <span>&rarr;</span></div><div class="page-indicator">03 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 04 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Ingestion Spine</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Stream Ingestion - Amazon Kinesis</h1>
+            <p class="body-text" style="font-size: 30px;">Acting as the system's "shock absorber," handling millions of <span class="highlight">GPS pings</span> without data loss.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Order Preservation:</span> Sharding by Courier ID ensures telemetry is processed in the exact sequence generated.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Decoupled Architecture:</span> Buffers spikes in field activity so they don't overwhelm downstream databases.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Parallel Consumption:</span> Simultaneously feeds Lambda for logic and S3 for long-term archival.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <span style="color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase;">Engineer's Note</span>
+                <div style="font-size: 26px; margin-top: 5px;">Kinesis is critical for decoupling our real-time fleet activity from our persistence layer.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Service <span>&rarr;</span></div><div class="page-indicator">04 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 05 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Fast Path Processing</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Stateless Events - AWS Lambda</h1>
+            <p class="body-text" style="font-size: 30px;">Our event-driven "First Responder," handling <span class="highlight">atomic, high-speed triggers</span> like status updates and push notifications instantly.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Sub-second Execution:</span> Optimized for rapid-fire delivery status changes and mobile app triggers.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Event-Driven Scaling:</span> Scales instantly to handle thousands of concurrent GPS pings during peak windows.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Cost Efficiency:</span> Pay-per-execution model ensures we only spend resources when a courier interacts.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <span style="color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase;">Engineer's Note</span>
+                <div style="font-size: 26px; margin-top: 5px;">Lambda handles the high-volume noise so our heavier compute resources stay focused on optimization.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Service <span>&rarr;</span></div><div class="page-indicator">05 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 06 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Computational Logic</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Heavy Compute - AWS Fargate</h1>
+            <p class="body-text" style="font-size: 30px;">For long-running tasks like <span class="highlight">multi-constraint route optimization</span> that exceed serverless execution limits.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Route Optimization:</span> Runs complex math to recalculate courier paths in real-time as conditions shift.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Global Dispatching:</span> Processes massive datasets to match the most efficient courier to an order.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Serverless Containers:</span> Full container power without the maintenance burden of managing EC2.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <span style="color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase;">Engineer's Note</span>
+                <div style="font-size: 26px; margin-top: 5px;">Fargate is where the "Heavy Math" lives, allowing for stateful logic with consistent memory.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Service <span>&rarr;</span></div><div class="page-indicator">06 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 07 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Acceleration Layer</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">In-Memory Speed - ElastiCache Redis</h1>
+            <p class="body-text" style="font-size: 30px;">A protective shield for our databases, storing <span class="highlight">"hot" data</span> and courier sessions in-memory to prevent bottlenecks.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Database Offloading:</span> Absorbs the massive volume of read requests that would otherwise crush Aurora.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Real-time State:</span> Manages volatile courier status updates with sub-millisecond response times.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Distributed Locking:</span> Prevents "Double Dispatching" by ensuring synchronized order state.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <span style="color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase;">Engineer's Note</span>
+                <div style="font-size: 26px; margin-top: 5px;">Caching isn't optional at this scale; it's the only way to keep our 10M+ delivery state fast.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Service <span>&rarr;</span></div><div class="page-indicator">07 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 08 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Data Lake</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Ground Truth - Amazon S3</h1>
+            <p class="body-text" style="font-size: 30px;">Our immutable archival layer, providing a landing zone for every <span class="highlight">GPS ping and status update</span> for future analysis.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Parquet Optimization:</span> Stores archived events in compressed formats to slash storage costs.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">11 Nines Durability:</span> Guaranteed zero data loss for years of historical delivery telemetry.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Athena Integration:</span> Enables direct SQL queries over raw logs without ingestion overhead.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <span style="color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase;">Engineer's Note</span>
+                <div style="font-size: 26px; margin-top: 5px;">If our operational databases ever fail, we can rebuild the entire system state from these logs.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Service <span>&rarr;</span></div><div class="page-indicator">08 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 09 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Relational Heart</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Spatial Integrity - Aurora & PostGIS</h1>
+            <p class="body-text" style="font-size: 30px;">Managing <span class="highlight">complex order lifecycles</span> and advanced geographic intelligence through specialized spatial engines.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Complex Geofencing:</span> Triggers delivery events automatically as couriers cross virtual polygons.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Spatial Indexing (GIST):</span> Queries millions of locations geographically in milliseconds, avoiding table scans.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">High Durability:</span> Multi-AZ replication ensures zero-data-loss failover for our financial records.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <span style="color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase;">Engineer's Note</span>
+                <div style="font-size: 26px; margin-top: 5px;">We use PostGIS because proximity matching at this scale requires a specialized spatial relationship engine.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Service <span>&rarr;</span></div><div class="page-indicator">09 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 10 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Analytical Warehouse</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">High-Performance BI - Amazon Redshift</h1>
+            <p class="body-text" style="font-size: 30px;">Decoupling analytical workloads from our production path to analyze <span class="highlight">billions of rows</span> of historical data.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Parallel Processing:</span> Executes complex SQL aggregations over massive datasets in seconds.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Redshift Spectrum:</span> Queries S3 directly, joining archival logs with warehouse data seamlessly.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Automatic ETL:</span> Uses high-speed COPY commands to ingest processed data from S3 for near-real-time BI.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <span style="color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase;">Engineer's Note</span>
+                <div style="font-size: 26px; margin-top: 5px;">Redshift keeps heavy reporting away from the hot path, ensuring zero impact on active delivery systems.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Next Slide <span>&rarr;</span></div><div class="page-indicator">10 / 11</div></div>
+    </div>
+
+    <!-- SLIDE 11 -->
+    <div class="slide">
+        <svg class="save-bookmark" viewBox="0 0 80 120"><path d="M0 0H80V120L40 95L0 120V0Z" /><path d="M30 30H50V60L40 52L30 60V30Z" fill="#0f172a" opacity="0.8"/></svg>
+        <div class="header-area">
+            <div class="top-bar"><span class="top-label">Architecture Outcomes</span><div class="top-line"></div></div>
+            <h1 style="font-size: 60px;">Scale Without Compromise</h1>
+            <p class="body-text" style="font-size: 30px;">This distributed pipeline transforms the chaos of 10M+ daily events into a <span class="highlight">structured, self-healing</span> operational model.</p>
+        </div>
+        <div class="middle-content">
+            <ul class="feature-list">
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Infinite Scalability:</span> Managed services allow growth from 100 to 10M+ deliveries seamlessly.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Maximum Resilience:</span> Multi-AZ deployments and self-healing storage ensure the fleet is never offline.</div></li>
+                <li class="feature-item"><span class="bullet">▹</span> <div><span class="highlight">Performance Benchmarks:</span> Redis and DynamoDB keep GPS ingestion in the sub-millisecond range.</div></li>
+            </ul>
+            <div class="engineer-note">
+                <span style="color: var(--accent-mint); font-size: 20px; font-weight: 900; text-transform: uppercase;">Engineer's Note</span>
+                <div style="font-size: 26px; margin-top: 5px;">The best architecture is one you don't fix at 2 AM. Managed services do the heavy lifting for us.</div>
+            </div>
+        </div>
+        <div class="footer"><div class="action-btn">Done <span>&check;</span></div><div class="page-indicator">11 / 11</div></div>
+    </div>
+
+</body>
+</html>

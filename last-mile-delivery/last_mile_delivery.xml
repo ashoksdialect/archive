@@ -1,0 +1,92 @@
+<mxGraphModel dx="1717" dy="937" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="wUu8o9lmgoTJ77pX2tKw-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+      <mxGeometry height="740" width="1090" x="50" y="60" as="geometry" />
+    </mxCell>
+    <mxCell id="node_app" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#94a3b8;fontStyle=1" value="Courier App" vertex="1">
+      <mxGeometry height="60" width="120" x="70" y="150" as="geometry" />
+    </mxCell>
+    <mxCell id="node_r53" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#D45B07;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.route_53;" value="Amazon Route 53" vertex="1">
+      <mxGeometry height="80" width="80" x="90" y="330" as="geometry" />
+    </mxCell>
+    <mxCell id="node_kinesis" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#AD688B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.kinesis_data_streams;" value="Amazon Kinesis" vertex="1">
+      <mxGeometry height="80" width="80" x="340" y="330" as="geometry" />
+    </mxCell>
+    <mxCell id="node_lambda" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#D45B07;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.lambda;" value="AWS Lambda" vertex="1">
+      <mxGeometry height="80" width="80" x="590" y="100" as="geometry" />
+    </mxCell>
+    <mxCell id="node_fargate" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#F58534;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.fargate;" value="AWS Fargate" vertex="1">
+      <mxGeometry height="80" width="80" x="590" y="520" as="geometry" />
+    </mxCell>
+    <mxCell id="node_redis" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C0392B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.elasticache;" value="ElastiCache (Redis)" vertex="1">
+      <mxGeometry height="80" width="80" x="780" y="330" as="geometry" />
+    </mxCell>
+    <mxCell id="node_dynamo" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#3B48CC;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.dynamodb;" value="Amazon DynamoDB" vertex="1">
+      <mxGeometry height="80" width="80" x="1020" y="150" as="geometry" />
+    </mxCell>
+    <mxCell id="node_aurora" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#3B48CC;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.aurora;" value="Amazon Aurora" vertex="1">
+      <mxGeometry height="80" width="80" x="1020" y="480" as="geometry" />
+    </mxCell>
+    <mxCell id="node_postgis" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#3B48CC;fontStyle=1;fontSize=12;" value="+ PostGIS" vertex="1">
+      <mxGeometry height="30" width="100" x="1000" y="580" as="geometry" />
+    </mxCell>
+    <mxCell id="node_s3" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#277116;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.s3;" value="Amazon S3" vertex="1">
+      <mxGeometry height="80" width="80" x="340" y="650" as="geometry" />
+    </mxCell>
+    <mxCell id="node_redshift" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#4D27AA;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.redshift;" value="Amazon Redshift" vertex="1">
+      <mxGeometry height="80" width="80" x="780" y="650" as="geometry" />
+    </mxCell>
+    <mxCell id="edge1" edge="1" parent="1" source="node_app" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="node_r53" value="HTTPS Post Request">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge2" edge="1" parent="1" source="node_r53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="node_kinesis" value="Latency-Based Routing">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge3" edge="1" parent="1" source="node_kinesis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;" target="node_lambda" value="Stream Ingestion (Partitioned by ID)">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="500" y="370" />
+          <mxPoint x="500" y="140" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="edge4" edge="1" parent="1" source="node_kinesis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;" target="node_fargate" value="Parallel Batch Consumption">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="500" y="370" />
+          <mxPoint x="500" y="560" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="edge5" edge="1" parent="1" source="node_lambda" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;" target="node_redis" value="Cache Lookups (DB Offload)">
+      <mxGeometry relative="1" x="0.35" as="geometry" />
+    </mxCell>
+    <mxCell id="edge6" edge="1" parent="1" source="node_fargate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;" target="node_redis" value="Compute Heavy Optimization">
+      <mxGeometry relative="1" x="0.2439" as="geometry" />
+    </mxCell>
+    <mxCell id="edge7" edge="1" parent="1" source="node_redis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;" target="node_dynamo" value="Update Tracking State">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="940" y="370" />
+          <mxPoint x="940" y="190" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="edge8" edge="1" parent="1" source="node_redis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;" target="node_aurora" value="Spatial &amp; Order Logic">
+      <mxGeometry relative="1" x="0.2124" as="geometry">
+        <Array as="points">
+          <mxPoint x="940" y="370" />
+          <mxPoint x="940" y="520" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="edge9" edge="1" parent="1" source="node_kinesis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="node_s3" value="Archival (Parquet Format)">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge10" edge="1" parent="1" source="node_s3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="node_redshift" value="ETL / COPY Command">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>
